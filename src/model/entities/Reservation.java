@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import model.exceptions.DomainException;
+
 public class Reservation { // OBJETO RESERVATION
 
 	// objeto com seus atributos e seus tipos
@@ -11,14 +13,24 @@ public class Reservation { // OBJETO RESERVATION
 	private Date checkIn;
 	private Date checkOut;
 
-	// declarar para usar e imprimer dados com o uso da marcara com formatação
-	// correta
+	// declarar para usar e imprimer dados com o uso da marcara com formatação correta
 	// STATIC: para que NÃO seja instânciada um novo simpleDateFormat para cada
 	// OBJETO RESERVATION que a aplicação tiver, APENAS UM
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 	// criando contrutore, criando argumento com seus tipos
-	public Reservation(Integer roomNumber, Date checkIn, Date checkOut) {
+	public Reservation(Integer roomNumber, Date checkIn, Date checkOut) throws DomainException {// propagando exceção se fosse runTimeException poderia retir o throws
+		if (!checkOut.after(checkIn)) { // e se a data de cheout NAO for posterior da data de checkIn também não pode.
+			throw new DomainException("Check-out date must be after check-in date");
+			/* programação defencisa
+			tratando já no inicio para que seja verificado que o cheout seja posterior ao
+			checkin*/
+		}
+		Date now = new Date();
+		if (checkIn.before(now) || checkOut.before(now)) {
+			throw new DomainException("Reservation dates must be future dates of the current date"); // usando classe de exceção																							
+			// NO CHEKOUT A DATA NÃO PODE SER ANTERIOR A DATA DO CHECKIN
+		}
 		this.roomNumber = roomNumber;
 		this.checkIn = checkIn;// checkIn do OBEJETO recebe o que veio no argumento
 		this.checkOut = checkOut;
@@ -57,26 +69,23 @@ public class Reservation { // OBJETO RESERVATION
 
 	}
 
-	// retornada VAZIO (void), agora vai retornar uma STRING
-	public String updateDates(Date checkIn, Date checkOut) {
+	public void updateDates(Date checkIn, Date checkOut) throws DomainException {/* throws DomainException = permite que
+																					 meu metodo updateDates PODE
+																					lançar uma exceção*/ 
 
 		Date now = new Date();
-
 		// 1º VERIFICANDO O ERRO
-
 		// NO CHEKIN A DATA NAO PODE SER ANTERIOR a data atual
 		if (checkIn.before(now) || checkOut.before(now)) {
-			return "Reservation dates for update must be future dates"; // return corta o metodo e retorna uma string
+			throw new DomainException("Reservation dates for update must be future dates"); // usando classe de exceção																							
 			// NO CHEKOUT A DATA NÃO PODE SER ANTERIOR A DATA DO CHECKIN
+		} // if lança a exceção
+		if (!checkOut.after(checkIn)) { // e se a data de cheout NAO for posterior da data de checkIn também não pode.
+			throw new DomainException("Check-out date must be after check-in date");
 		}
-		if (!checkOut.after(checkIn)) { // e se a data de cheout NAO for posterior da data de checkIn também não pode
-										// ser atualizada
-			return "Check-out date must be after check-in date";
-		}
-		//ATUALIZA APO 1º VERICAÇÃO
+		// ATUALIZA APOS 1º VERICAÇÃO
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
-		return null; //RETORNA SE NÃO TIVER ERROS!! LOGO É O RETORNO DA STRING SE DER CERTO
 	}
 
 	@Override
@@ -84,13 +93,5 @@ public class Reservation { // OBJETO RESERVATION
 		return "Rom " + roomNumber + ", check-in: " + sdf.format(checkIn) + ", check-out: " + sdf.format(checkOut)
 				+ ", " + duration() + " nights";
 	}
-
-	/*
-	 * DATAS NÃO VÃO MUDAR ARBITRARIAMENTE / SET ATUALIZA
-	 * 
-	 * public void setCheckIn(Date checkIn) { this.checkIn = checkIn; }
-	 * 
-	 * public void setCheckOut(Date checkOut) { this.checkOut = checkOut; }
-	 */
 
 }
